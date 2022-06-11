@@ -1,0 +1,171 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.Hoa-style {
+  width: 33.33%;
+  float: left;
+  text-align: center;
+}
+
+.Content-style {
+  width: 70%;
+  float: left;
+}
+
+.Width-100 {
+  width: 100%;
+}
+
+.Width-90 {
+  width: 90%;
+}
+
+.Width-30 {
+  width: 30%;
+}
+
+.Width-70 {
+  width: 70%;
+}
+
+.Width-15 {
+  width: 15%;
+}
+
+.Width-20 {
+  width: 20%;
+}
+
+.Danh-muc-2 {
+  text-align: center;
+  background-color: rgb(194, 233, 135);
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.Danh-muc-1 {
+  width: 15%;
+  font-weight: bold;
+  background-color: rgb(164, 228, 68);
+}
+
+.Text-black {
+  color: black;
+  text-decoration: underline;
+}
+
+.Text-black-1 {
+  color: black;
+  text-decoration: none;
+}
+
+.Text-green-1 {
+  color: green;
+  text-decoration: underline;
+}
+
+.Text-green {
+  color: green;
+}
+
+.Text-green-2 {
+  color: green;
+  font-weight: bold;
+}
+
+.Text-green-3 {
+  color: green;
+  font-weight: bold;
+  text-align: center;
+}
+
+.Table-index {
+  width: 96%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.Table-content-1 {
+  width: 15%;
+  background-color: rgb(241, 247, 232);
+}
+
+.Table-content-2 {
+  padding: 15px;
+}
+
+.Img-block {
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+  object-fit: contain;
+}
+
+.Header {
+  background-color: rgb(241, 247, 232);
+}
+
+.Img-block-header {
+  /* width: 274px;
+  height: 195px;  */
+  /* width: auto; */
+  object-fit: fill;
+  scale:inherit;
+  /* vertical-align:bottom; */
+  width: 100%;
+  /* display:block; */
+}
+
+.Text-center {
+  text-align: center;
+}
+
+.Img-payment {
+  float: center;
+  width: 122px;
+  height: 19px;
+}
+
+.Pading-0 {
+  padding: 0 !important;
+}
+
+.Active-link {
+  color: green;
+}

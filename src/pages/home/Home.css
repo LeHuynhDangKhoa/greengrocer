@@ -1,0 +1,19 @@
+.carousel-button {
+  opacity: 0.7;
+  transition: 0.4s;
+}
+
+.carousel-button:hover {
+  opacity: 1;
+}
+
+.blog-home {
+  display: inline-block;
+  position: relative;
+  width: 50%;
+}
+.blog-home:before {
+  content: "";
+  display: block;
+  margin-top: 100%;
+}

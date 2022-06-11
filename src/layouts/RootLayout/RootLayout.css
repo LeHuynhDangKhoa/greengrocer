@@ -1,0 +1,66 @@
+
+.root-layout__banner {
+    height: 50px;
+    display: table-cell;
+    vertical-align: middle;
+    width: 1000px;
+}
+
+.root-layout__marquee {
+    font-size: 20px;
+    color: white;
+    font-family: "Poppins", Arial, sans-serif;
+    font-weight: "bold";
+    text-transform: uppercase;
+    height: 50px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.root-layout__nav__logo {
+    font-weight: 800;
+    font-size: 20px;
+    text-transform: uppercase;
+    color: #82ae46 !important;
+    font-family: "Poppins", Arial, sans-serif;
+    margin-right: 5%;
+}
+
+.root-layout__nav__link {
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: black;
+    font-family: "Poppins", Arial, sans-serif;
+    padding-right: 3% !important;
+}
+
+.root-layout__nav__dropdown {
+    font-weight: bold;
+    font-size: 12px;
+    color: black;
+    font-family: "Poppins", Arial, sans-serif;
+    text-decoration: none;
+}
+
+.root-layout__form__search {
+    min-width: 350px;
+    width: 100% !important;
+}
+
+.root-layout__cart__count {
+    position: absolute;
+    z-index: 1;
+    top: -7px;
+    left: 21px;
+    width: 19px;
+    height: 19px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: aliceblue;
+    background-color: #82ae46;
+}
