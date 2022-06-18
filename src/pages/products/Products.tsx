@@ -44,7 +44,7 @@ import {
 } from "react-router-dom";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Category, Product, ProductCategory } from "../../commons/Types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProductsApi from "../../services/api/products";
 import { useRootLayout } from "../../hooks/useRootLayout";
 import { ProductCard } from "../../components/products/ProductCard";
@@ -273,8 +273,7 @@ function Products() {
   const validationProductSchema = Yup.object({
     name: Yup.string().required("Name is required"),
     price: Yup.number().positive("Price is required and must be a positive number").required("Price is required and must be a positive number"),
-    discount: Yup.number().min(0, "Discount must be greater than or equal to 0").max(100, "Discount must be less than or equal to 100").required("Discount's value is from 0 to 100"),
-    // kind: Yup.number().positive("Category must be a positive interger").integer("Category must be a positive interger").required("Category is required"),
+    discount: Yup.number().min(0, "Discount must be greater than or equal to 0").max(1, "Discount must be less than or equal to 100").required("Discount's value is from 0 to 100"),
   }).required();
   const {
     handleSubmit: handleSubmitProduct,
@@ -289,6 +288,7 @@ function Products() {
   const [reloadFlag, setReloadFlag] = useState(false);
   const [productImage, setProductImage] = useState("");
   const [changeCategories, setChangeCategories] = useState(0);
+  const imageRef = useRef<HTMLInputElement>(null);
 
   const handleChangePagination = (
     event: React.ChangeEvent<unknown>,
@@ -432,6 +432,8 @@ function Products() {
 
   const handleClearProductImage = () => {
     setProductImage("");
+    if (imageRef !== null && imageRef.current !== null)
+      imageRef.current.value = "";
   };
 
   useEffect(() => {
@@ -705,6 +707,7 @@ function Products() {
                                   id="upload-button-file"
                                   multiple
                                   type="file"
+                                  ref={imageRef}
                                   onChange={(event) => {
                                     if (
                                       event.target.files &&
@@ -759,7 +762,7 @@ function Products() {
                               defaultValue={3}
                               onChange={(e, newValue) => {
                                 setValue("star", newValue as number);
-                              }}                                 
+                              }}
                             />
                           </Box>
                         )}
@@ -866,7 +869,7 @@ function Products() {
                                   labelId="categories"
                                   value={changeCategories}
                                   label="Categories"
-                                  onChange={(val) => { 
+                                  onChange={(val) => {
                                     setValue("kind", Number(val.target.value));
                                     setChangeCategories(Number(val.target.value));
                                   }}
@@ -896,17 +899,17 @@ function Products() {
                                   htmlFor="discount"
                                   style={{ display: "flex", fontWeight: "bold" }}
                                 >
-                                  Discount (%){" "}
+                                  Discount (%)
                                   {/* <Typography color="error">&nbsp;*</Typography> */}
                                 </InputLabel>
                                 <OutlinedInput
                                   id="discount"
-                                  onChange={(val) => setValue("discount", Number(val.target.value)/100)}
+                                  onChange={(val) => setValue("discount", Number(val.target.value) / 100)}
                                   label="Discount (%)"
                                   error={!!errorsProduct.discount}
                                   type="number"
                                   defaultValue={0}
-                                  inputProps={{ step: 0.01 }}
+                                  inputProps={{ step: 0.1 }}
                                 />
                                 {errorsProduct.discount && (
                                   <Typography

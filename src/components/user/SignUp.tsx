@@ -15,7 +15,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Anchor } from ".";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -89,6 +89,7 @@ export const SignUpDrawer: FC<{
   });
   const [image, setImage] = useState("");
   const { enqueueSnackbar } = useSnackbar();
+  const imageRef = useRef<HTMLInputElement>(null);
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -144,6 +145,8 @@ export const SignUpDrawer: FC<{
 
   const handleClearAvatar = () => {
     setImage("");
+    if (imageRef !== null && imageRef.current !== null)
+      imageRef.current.value = "";
   };
 
   return (
@@ -165,7 +168,7 @@ export const SignUpDrawer: FC<{
           style={{ display: "flex", alignItems: "center" }}
         >
           <Grid item xs={12} sm={6}>
-            <Typography style={{fontWeight: "bold"}}>Sign Up</Typography>
+            <Typography style={{ fontWeight: "bold" }}>Sign Up</Typography>
           </Grid>
           <Grid
             item
@@ -207,6 +210,7 @@ export const SignUpDrawer: FC<{
                     id="upload-button-file"
                     multiple
                     type="file"
+                    ref={imageRef}
                     onChange={(event) => {
                       if (event.target.files && event.target.files.length > 0)
                         field.onChange(event.target.files[0]);
@@ -377,7 +381,7 @@ export const SignUpDrawer: FC<{
               style={{ width: "100%", marginTop: "15px" }}
               size="small"
             >
-              <InputLabel htmlFor="phone" style={{fontWeight: "bold"}}>Phone</InputLabel>
+              <InputLabel htmlFor="phone" style={{ fontWeight: "bold" }}>Phone</InputLabel>
               <OutlinedInput
                 id="phone"
                 {...field}

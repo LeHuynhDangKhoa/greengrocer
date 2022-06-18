@@ -15,7 +15,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Anchor } from ".";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -86,9 +86,10 @@ export const ProfileDrawer: FC<{
     const {
         webStore: { user },
         modifyWebStore,
-      } = useWebStore();
+    } = useWebStore();
     const [image, setImage] = useState(user ? user.image : "");
     const { enqueueSnackbar } = useSnackbar();
+    const imageRef = useRef<HTMLInputElement>(null);
 
     const handleUpdateProfile: SubmitHandler<SignUpForm> = (data) => {
         AuthenApi.UpdateProfile(data, user ? user._id : "")
@@ -106,7 +107,7 @@ export const ProfileDrawer: FC<{
                     },
                 });
                 localStorage.setItem("user", JSON.stringify(res.data));
-                modifyWebStore({user: res.data})
+                modifyWebStore({ user: res.data })
             })
             .catch((err) => {
                 enqueueSnackbar(err.response.data.message, {
@@ -131,28 +132,30 @@ export const ProfileDrawer: FC<{
     const handleClearAvatar = () => {
         setImage("");
         setValue("image", undefined);
+        if (imageRef !== null && imageRef.current !== null)
+            imageRef.current.value = "";
     };
 
     useEffect(() => {
         AuthenApi.Profile(user ? user._id : "")
             .then((res) => {
-                modifyWebStore({user: res.data})
+                modifyWebStore({ user: res.data })
                 setValue("username", res.data.username);
                 setValue("email", res.data.email);
                 setValue("phone", res.data.phone);
 
                 if (res.data.image && res.data.image.length > 0) {
                     AuthenApi.GetImage(BaseUrl + "/" + res.data.image)
-                    .then((response) => {
-                        if (response.data) {
-                            let reader = new FileReader();
-                            reader.onloadend = function () {
-                                setImage(reader.result as string);
-                            };
-                            reader.readAsDataURL(response.data);
-                            setValue("image", response.data);
-                        }
-                    })
+                        .then((response) => {
+                            if (response.data) {
+                                let reader = new FileReader();
+                                reader.onloadend = function () {
+                                    setImage(reader.result as string);
+                                };
+                                reader.readAsDataURL(response.data);
+                                setValue("image", response.data);
+                            }
+                        })
                 }
             })
             .catch((err) => {
@@ -183,7 +186,7 @@ export const ProfileDrawer: FC<{
                     style={{ display: "flex", alignItems: "center" }}
                 >
                     <Grid item xs={12} sm={6}>
-                        <Typography style={{fontWeight: "bold"}}>Profile</Typography>
+                        <Typography style={{ fontWeight: "bold" }}>Profile</Typography>
                     </Grid>
                     <Grid
                         item
@@ -225,6 +228,7 @@ export const ProfileDrawer: FC<{
                                         id="upload-button-file"
                                         multiple
                                         type="file"
+                                        ref={imageRef}
                                         onChange={(event) => {
                                             if (event.target.files && event.target.files.length > 0)
                                                 field.onChange(event.target.files[0]);
@@ -316,7 +320,7 @@ export const ProfileDrawer: FC<{
                             style={{ width: "100%", marginTop: "15px" }}
                             size="small"
                         >
-                            <InputLabel htmlFor="phone" style={{fontWeight: "bold"}}>Phone</InputLabel>
+                            <InputLabel htmlFor="phone" style={{ fontWeight: "bold" }}>Phone</InputLabel>
                             <OutlinedInput
                                 id="phone"
                                 {...field}

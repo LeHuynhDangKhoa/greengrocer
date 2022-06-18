@@ -297,7 +297,7 @@ export const ProductCard: FC<{
                 fontSize: "14px",
               }}
             >
-              {product.discount * 100 + "% OFF"}
+              {(product.discount * 100).toFixed(1) + "% OFF"}
             </Box>
           ) : (
             ""

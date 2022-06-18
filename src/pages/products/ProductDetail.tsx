@@ -85,23 +85,31 @@ function ProductDetail() {
   };
 
   const handleAddQuantity = (e: React.MouseEvent<HTMLElement>) => {
-    let tmp = quantity + 1;
+    let tmp = isNaN(quantity) ? 1: quantity + 1;
     setQuantity(tmp);
   };
 
   const handleSubstractQuantity = (e: React.MouseEvent<HTMLElement>) => {
-    let tmp = quantity - 1;
+    let tmp = isNaN(quantity) ? 1 : quantity - 1;
     setQuantity(tmp > 1 ? tmp : 1);
   };
 
   const handleAddToCart = () => {
-    enqueueSnackbar(quantity + " " + product?.name + "(s) is added to your card", {
-      variant: "success",
-      autoHideDuration: 4000,
-      action: SnackBarAction,
-    });
-    addProductToCart(product as Product, category, quantity);
-    modifyWebStore({ cartCount: cartCount + quantity });
+    if (isNaN(quantity)) {
+      enqueueSnackbar("Please input quantity.", {
+        variant: "warning",
+        autoHideDuration: 4000,
+        action: SnackBarAction,
+      });
+    } else {
+      enqueueSnackbar(quantity + " " + product?.name + "(s) is added to your card", {
+        variant: "success",
+        autoHideDuration: 4000,
+        action: SnackBarAction,
+      });
+      addProductToCart(product as Product, category, quantity);
+      modifyWebStore({ cartCount: cartCount + quantity });
+    }
   };
 
   useEffect(() => {
