@@ -4,11 +4,11 @@ import { LoginForm, SignUpForm } from "../../commons/Types";
 
 const AuthenApi = {
   SignUp(form: SignUpForm) {
-    return API().postForm(`/sign_up/`, form);
+    return API().postForm(`/register`, form);
   },
 
   Login(form: LoginForm) {
-    return API().post(`/login/`, form);
+    return API().post(`/login`, form);
   },
 
   Profile(id: string) {

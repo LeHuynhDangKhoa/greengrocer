@@ -94,7 +94,7 @@ export const LoginDrawer: FC<{
   const handleLogin: SubmitHandler<LoginForm> = (data) => {
     AuthenApi.Login(data)
       .then((res) => {
-        enqueueSnackbar(`Login successfully. Welcome ${res.data.username}`, {
+        enqueueSnackbar(`Login successfully. Welcome ${res.data.data.username}`, {
           variant: "success",
           autoHideDuration: 4000,
           action: SnackBarAction,
@@ -107,7 +107,7 @@ export const LoginDrawer: FC<{
           },
         });
 
-        localStorage.setItem("user", JSON.stringify(res.data));
+        localStorage.setItem("user", JSON.stringify(res.data.data));
         modifyWebStore({user: res.data});
         reset(defaultValues);
       })
