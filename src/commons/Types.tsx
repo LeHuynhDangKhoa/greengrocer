@@ -87,7 +87,7 @@ export interface User extends LoginForm {
   image: string;
   email: string;
   phone: string;
-  _id: string;
+  id: number;
 }
 
 export interface Category {
@@ -95,10 +95,9 @@ export interface Category {
 }
 
 export interface CartCheckoutInfo {
-  user_id: string;
+  user_id: number;
   username: string;
   customer_name: string;
   customer_address: string;
   detail: CartSession;
 }
-

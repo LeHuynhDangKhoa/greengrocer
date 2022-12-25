@@ -92,7 +92,7 @@ export const ProfileDrawer: FC<{
     const imageRef = useRef<HTMLInputElement>(null);
 
     const handleUpdateProfile: SubmitHandler<SignUpForm> = (data) => {
-        AuthenApi.UpdateProfile(data, user ? user._id : "")
+        AuthenApi.UpdateProfile(data, user ? user.id : 0)
             .then((res) => {
                 enqueueSnackbar("Update your profile successfully.", {
                     variant: "success",
@@ -106,8 +106,8 @@ export const ProfileDrawer: FC<{
                         [anchor]: false,
                     },
                 });
-                localStorage.setItem("user", JSON.stringify(res.data));
-                modifyWebStore({ user: res.data })
+                localStorage.setItem("user", JSON.stringify(res.data.data));
+                modifyWebStore({ user: res.data.data })
             })
             .catch((err) => {
                 enqueueSnackbar(err.response.data.message, {
@@ -137,15 +137,14 @@ export const ProfileDrawer: FC<{
     };
 
     useEffect(() => {
-        AuthenApi.Profile(user ? user._id : "")
+        AuthenApi.Profile(user ? user.id : 0)
             .then((res) => {
-                modifyWebStore({ user: res.data })
-                setValue("username", res.data.username);
-                setValue("email", res.data.email);
-                setValue("phone", res.data.phone);
-
-                if (res.data.image && res.data.image.length > 0) {
-                    AuthenApi.GetImage(BaseUrl + "/" + res.data.image)
+                modifyWebStore({ user: res.data.data })
+                setValue("username", res.data.data.username);
+                setValue("email", res.data.data.email);
+                setValue("phone", res.data.data.phone);
+                if (res.data.data.image && res.data.data.image.length > 0) {
+                    AuthenApi.GetImage(BaseUrl + "/" + res.data.data.image)
                         .then((response) => {
                             if (response.data) {
                                 let reader = new FileReader();
@@ -165,7 +164,7 @@ export const ProfileDrawer: FC<{
                     action: SnackBarAction,
                 });
             });
-    }, [user?._id])
+    }, [user?.id])
 
     return (
         <Box
@@ -229,11 +228,11 @@ export const ProfileDrawer: FC<{
                                         multiple
                                         type="file"
                                         ref={imageRef}
-                                        onChange={(event) => {
-                                            if (event.target.files && event.target.files.length > 0)
-                                                field.onChange(event.target.files[0]);
-                                            handleChangeAvatar(event);
-                                        }}
+                                        // onChange={(event) => {
+                                        //     if (event.target.files && event.target.files.length > 0)
+                                        //         field.onChange(event.target.files[0]);
+                                        //     handleChangeAvatar(event);
+                                        // }}
                                     />
                                     <label htmlFor="upload-button-file">
                                         <IconButton aria-label="upload picture" component="span">
@@ -244,7 +243,7 @@ export const ProfileDrawer: FC<{
                                     </label>
                                 </Stack>
                             </Tooltip>
-                            {image.length > 0 && (
+                            {image && image.length > 0 && (
                                 <Button
                                     size="small"
                                     style={{

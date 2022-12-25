@@ -11,8 +11,8 @@ const AuthenApi = {
     return API().post(`/login`, form);
   },
 
-  Profile(id: string) {
-    return API().get(`/users/` + id);
+  Profile(id: number) {
+    return API().get(`/users/` + id.toString());
   },
 
   GetImage(url: string) {
@@ -20,8 +20,8 @@ const AuthenApi = {
     return API().get(url, config);
   },
 
-  UpdateProfile(form: SignUpForm, id: string) {
-    return API().putForm(`/users/` + id, form);
+  UpdateProfile(form: SignUpForm, id: number) {
+    return API().putForm(`/users/` + id.toString(), form);
   }
 };
 

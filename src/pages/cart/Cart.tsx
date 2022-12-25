@@ -308,7 +308,7 @@ const Cart = () => {
     if (localStorage.getItem("user")) {
       const user: User = JSON.parse(localStorage.getItem("user") as string)
       const tmp: CartCheckoutInfo = {
-        user_id: user._id,
+        user_id: user.id,
         username: user.username,
         customer_name: data.name,
         customer_address: data.address,

@@ -108,7 +108,7 @@ export const LoginDrawer: FC<{
         });
 
         localStorage.setItem("user", JSON.stringify(res.data.data));
-        modifyWebStore({user: res.data});
+        modifyWebStore({user: res.data.data});
         reset(defaultValues);
       })
       .catch((err) => {
