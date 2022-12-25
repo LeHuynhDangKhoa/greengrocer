@@ -10,19 +10,19 @@ export interface IconProps {
 }
 
 export interface ProductCategory {
-  kind: number;
+  id: number;
   name: string;
   total: number;
 }
 
 export interface Product {
-  uid: number;
+  id: number;
   name: string;
   image: string | File;
   price: number;
   star: number;
   discount: number;
-  kind?: number;
+  category_id?: number;
   description?: string;
 }
 

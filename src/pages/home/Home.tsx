@@ -21,9 +21,9 @@ function Home() {
     ProductsApi.GetProductsCategories()
       .then((res) => {
         if (unmounted) return;
-        let tmp: Array<ProductCategory> = res.data;
+        let tmp: Array<ProductCategory> = res.data.data;
         let all = {
-          kind: 0,
+          id: 0,
           name: "All",
           total: 0,
         };

@@ -234,7 +234,7 @@ const RootLayoutHeader = (menuLayout: RootLayoutType) => {
     ProductsApi.GetProductsCategories()
       .then((res) => {
         if (unmounted) return;
-        setCategories(res.data);
+        setCategories(res.data.data);
       })
       .catch((err) => {
         enqueueSnackbar(err.response.data.message, {
@@ -387,11 +387,11 @@ const RootLayoutHeader = (menuLayout: RootLayoutType) => {
                                 textDecoration: "none",
                                 color: "#757575",
                               }}
-                              key={category.kind + "-" + category.name}
+                              key={category.id + "-" + category.name}
                               onClick={handleCloseProductsMenu}
                             >
                               <MenuItem
-                                key={category.kind + "-" + category.name}
+                                key={category.id + "-" + category.name}
                               >
                                 <Typography textAlign="center">
                                   {category.name}
@@ -443,7 +443,7 @@ const RootLayoutHeader = (menuLayout: RootLayoutType) => {
                   >
                     <NestedMenuItem parentMenuOpen={Boolean(anchorElProducts)}>
                       {categories.map((category) => (
-                        <MenuItem key={category.kind + "-" + category.name}>
+                        <MenuItem key={category.id + "-" + category.name}>
                           <Typography textAlign="center">
                             {category.name}
                           </Typography>
@@ -532,7 +532,7 @@ const RootLayoutHeader = (menuLayout: RootLayoutType) => {
                     <LinkTo
                       to={"/products/" + category.name.split(" ").join("_")}
                       style={{ textDecoration: "none", color: "#757575" }}
-                      key={category.kind + "-" + category.name}
+                      key={category.id + "-" + category.name}
                       onClick={popupProductsMenu.close}
                     >
                       <MenuItem>

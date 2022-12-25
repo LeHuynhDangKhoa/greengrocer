@@ -504,14 +504,14 @@ function Products() {
     ProductsApi.GetProductsCategories()
       .then((res) => {
         if (unmounted) return;
-        let tmp: Array<ProductCategory> = res.data;
+        let tmp: Array<ProductCategory> = res.data.data;
         let all = {
-          kind: 0,
+          id: 0,
           name: "All",
           total: 0,
         };
-        setChangeCategories(tmp[0].kind)
-        setValue("kind", tmp[0].kind);
+        setChangeCategories(tmp[0].id)
+        setValue("category_id", tmp[0].id);
         if (tmp.length > 0) {
           for (let i = 0; i < tmp.length; i++) {
             all.total += tmp[i].total;
@@ -540,15 +540,15 @@ function Products() {
     const { sort, order, search, star, discount, priceFrom, priceTo } = filters;
     setProductsLoading(true);
 
-    let kind = "";
+    let categoryId = "";
     if (category) {
       let tmp = category.split("_");
-      kind = tmp.join(" ");
+      categoryId = tmp.join(" ");
     }
 
     ProductsApi.ProductsIndex(
       search as string,
-      kind as string,
+      categoryId as string,
       star as string,
       discount as string,
       priceFrom as string,
@@ -870,14 +870,14 @@ function Products() {
                                   value={changeCategories}
                                   label="Categories"
                                   onChange={(val) => {
-                                    setValue("kind", Number(val.target.value));
+                                    setValue("category_id", Number(val.target.value));
                                     setChangeCategories(Number(val.target.value));
                                   }}
                                   style={{ fontSize: "14px" }}
                                 >
                                   {categories.filter(item => item.name !== "All").map((category) => {
                                     return (
-                                      <MenuItem key={category.kind + "-" + category.name} value={category.kind}>
+                                      <MenuItem key={category.id + "-" + category.name} value={category.id}>
                                         {category.name}
                                       </MenuItem>
                                     );
@@ -885,7 +885,7 @@ function Products() {
                                 </Select>
                               </StyledHookFormControl>
                             )}
-                            name="kind"
+                            name="category_id"
                             control={controlProduct}
                           />
                         </Grid>
@@ -1165,7 +1165,7 @@ function Products() {
             </Grid>
             <Divider></Divider>
             <List>
-              {categories.map(({ kind, name, total }, i) => {
+              {categories.map(({ id, name, total }, i) => {
                 const path =
                   name === "All"
                     ? "/products"
@@ -1365,7 +1365,7 @@ function Products() {
                   return !categoriesLoading ? (
                     <Grid
                       item
-                      key={product.uid + "-" + product.name}
+                      key={product.id + "-" + product.name}
                       md={2.4}
                       style={{
                         marginTop: 25,
@@ -1379,7 +1379,7 @@ function Products() {
                         product={product}
                         category={
                           categories.filter(
-                            (category) => category.kind === product.kind
+                            (category) => category.id === product.category_id
                           )[0].name
                         }
                       />

@@ -252,7 +252,7 @@ export const ProductCard: FC<{
       onMouseOut={() => setHoverCard(false)}
     >
       <Link
-        to={"/products/" + category?.split(" ").join("_") + "/" + product.uid}
+        to={"/products/" + category?.split(" ").join("_") + "/" + product.id}
         style={{ textDecoration: "none" }}
       >
         <Box

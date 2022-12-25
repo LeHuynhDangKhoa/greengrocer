@@ -104,10 +104,10 @@ const BestSeller = ({categories, categoriesLoading}: {categories: Array<ProductC
             {bestSellerProducts.map(
               (product, i) => {
                 return (
-                  <Slide index={i} key={product.uid + "-" + product.name}>
+                  <Slide index={i} key={product.id + "-" + product.name}>
                     <Grid
                       item
-                      key={product.uid + "-" + product.name}
+                      key={product.id + "-" + product.name}
                       style={{
                         marginTop: 25,
                         textAlign: "center",
@@ -118,7 +118,7 @@ const BestSeller = ({categories, categoriesLoading}: {categories: Array<ProductC
                     >
                       <ProductCard
                         product={product}
-                        category={categories.filter(category => category.kind === product.kind)[0].name}
+                        category={categories.filter(category => category.id === product.category_id)[0].name}
                       />
                     </Grid>
                   </Slide>

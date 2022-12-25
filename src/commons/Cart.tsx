@@ -11,13 +11,13 @@ export const addProductToCart = (
       : product.price;
   if (localStorage.getItem("cart")) {
     let cart: CartSession = JSON.parse(localStorage.getItem("cart") as string);
-    const index = cart.data.findIndex((item) => item.id === product.uid);
+    const index = cart.data.findIndex((item) => item.id === product.id);
     if (index === -1) {
       cart.data.push({
-        id: product.uid,
+        id: product.id,
         name: product.name,
         image: product.image,
-        kind: product.kind,
+        kind: product.category_id,
         price: price,
         category: category,
         quantity: quantity,
@@ -34,10 +34,10 @@ export const addProductToCart = (
     const cart: CartSession = {
       data: [
         {
-          id: product.uid,
+          id: product.id,
           name: product.name,
           image: product.image,
-          kind: product.kind,
+          kind: product.category_id,
           price: price,
           category: category,
           quantity: quantity,

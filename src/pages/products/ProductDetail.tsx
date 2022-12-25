@@ -121,7 +121,7 @@ function ProductDetail() {
         if (unmounted) return;
         setRelatedProducts(
           res.data.data.data.filter(
-            (item: Product) => item.uid.toString() !== id
+            (item: Product) => item.id.toString() !== id
           )
         );
         setRelatedProductsLoading(false);
@@ -145,7 +145,7 @@ function ProductDetail() {
     ProductsApi.ProductDetail(id || "")
       .then((res) => {
         if (unmounted) return;
-        setProduct(res.data);
+        setProduct(res.data.data);
         setProductLoading(false);
       })
       .catch((err) => {
@@ -459,10 +459,10 @@ function ProductDetail() {
                         i
                       ) => {
                         return (
-                          <Slide index={i} key={product.uid + "-" + product.name}>
+                          <Slide index={i} key={product.id + "-" + product.name}>
                             <Grid
                               item
-                              key={product.uid + "-" + product.name}
+                              key={product.id + "-" + product.name}
                               style={{
                                 marginTop: 25,
                                 textAlign: "center",

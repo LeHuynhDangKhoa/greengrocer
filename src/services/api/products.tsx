@@ -4,7 +4,7 @@ import { Category, Product } from "../../commons/Types";
 const ProductsApi = {
   ProductsIndex(
     search?: string,
-    kind?: string,
+    categoryId?: string,
     star?: string,
     discount?: string,
     priceFrom?: string,
@@ -18,8 +18,8 @@ const ProductsApi = {
     if (search) {
       query = query + `search=${search}&`;
     }
-    if (kind) {
-      query = query + `kind=${kind}&`;
+    if (categoryId) {
+      query = query + `category=${categoryId}&`;
     }
     if (star) {
       query = query + `star=${star}&`;
@@ -53,7 +53,7 @@ const ProductsApi = {
   },
 
   GetProductsCategories() {
-    return API().get(`/products/categories`);
+    return API().get(`/categories`);
   },
 
   ProductDetail(id: string) {

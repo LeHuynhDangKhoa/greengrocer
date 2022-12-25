@@ -83,14 +83,14 @@ const Discount = ({categories, categoriesLoading}: {categories: Array<ProductCat
             {bestSellerProducts.map(
               (product, i) => {
                 return (
-                  <Grid item key={product.uid + "-" + product.name} md={2.4} style={{
+                  <Grid item key={product.id + "-" + product.name} md={2.4} style={{
                     marginTop: 25, textAlign: "center", display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                   }}>
                     <ProductCard
                       product={product}
-                      category={categories.filter(category => category.kind === product.kind)[0].name}
+                      category={categories.filter(category => category.id === product.category_id)[0].name}
                     />
                   </Grid>
                 );
