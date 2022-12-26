@@ -3,6 +3,7 @@ import { User } from "../commons/Types";
 
 interface WebStore {
   cartCount: number;
+  categoryCount: number;
   user: User | undefined;
 }
 
@@ -13,6 +14,7 @@ interface WebStoreContextProps {
 
 const defaultWebStore: WebStore = {
   cartCount: 0,
+  categoryCount: 0,
   user: localStorage.getItem("user")
   ? JSON.parse(localStorage.getItem("user") as string)
   : undefined

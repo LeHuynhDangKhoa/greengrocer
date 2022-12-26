@@ -228,11 +228,11 @@ export const ProfileDrawer: FC<{
                                         multiple
                                         type="file"
                                         ref={imageRef}
-                                        // onChange={(event) => {
-                                        //     if (event.target.files && event.target.files.length > 0)
-                                        //         field.onChange(event.target.files[0]);
-                                        //     handleChangeAvatar(event);
-                                        // }}
+                                        onChange={(event) => {
+                                            if (event.target.files && event.target.files.length > 0)
+                                                field.onChange(event.target.files[0]);
+                                            handleChangeAvatar(event);
+                                        }}
                                     />
                                     <label htmlFor="upload-button-file">
                                         <IconButton aria-label="upload picture" component="span">

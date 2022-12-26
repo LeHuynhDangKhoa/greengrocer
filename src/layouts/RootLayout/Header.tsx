@@ -159,7 +159,7 @@ const RootLayoutHeader = (menuLayout: RootLayoutType) => {
   const [cartQuantity, setCartQuantity] = useState(getCartQuantity);
   const [cartContent, setCartContent] = useState(getCartContent);
   const {
-    webStore: { cartCount },
+    webStore: { cartCount, categoryCount },
   } = useWebStore();
   const [drawerState, setDrawerState] = useState<DrawerState>({
     signUp: { top: false, left: false, bottom: false, right: false },
@@ -234,7 +234,10 @@ const RootLayoutHeader = (menuLayout: RootLayoutType) => {
     ProductsApi.GetProductsCategories()
       .then((res) => {
         if (unmounted) return;
-        setCategories(res.data.data);
+        let tmp: Array<ProductCategory> = res.data.data;
+        tmp = tmp.sort((a, b) => {if (a.name.toLowerCase() <= b.name.toLowerCase()) {return -1} else {return 1}});
+        modifyWebStore({ categoryCount: tmp.length })
+        setCategories(tmp);
       })
       .catch((err) => {
         enqueueSnackbar(err.response.data.message, {
@@ -247,7 +250,7 @@ const RootLayoutHeader = (menuLayout: RootLayoutType) => {
     return () => {
       unmounted = true;
     };
-  }, []);
+  }, [categoryCount]);
 
   useEffect(() => {
     setCartQuantity(getCartQuantity);

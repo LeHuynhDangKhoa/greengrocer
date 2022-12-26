@@ -256,7 +256,8 @@ function Products() {
   const [openAddCategoryModal, setOpenAddCategoryModal] = useState(false);
   const [openAddProductModal, setOpenAddProductModal] = useState(false);
   const {
-    webStore: { user },
+    webStore: { user, categoryCount },
+    modifyWebStore,
   } = useWebStore();
   const validationCategorySchema = Yup.object({
     name: Yup.string().required("Name is required"),
@@ -377,6 +378,7 @@ function Products() {
         resetCategory(defaultCategoryValues);
         handleCloseCategoryModal();
         setReloadFlag(!reloadFlag);
+        modifyWebStore({ categoryCount: categoryCount+1 })
       })
       .catch((err) => {
         enqueueSnackbar(err.response.data.message, {
@@ -505,6 +507,7 @@ function Products() {
       .then((res) => {
         if (unmounted) return;
         let tmp: Array<ProductCategory> = res.data.data;
+        tmp = tmp.sort((a, b) => {if (a.name.toLowerCase() <= b.name.toLowerCase()) {return -1} else {return 1}});
         let all = {
           id: 0,
           name: "All",
@@ -1208,7 +1211,7 @@ function Products() {
                             display: "flex",
                             justifyContent: "left",
                             width: "150px",
-                            textTransform: "capitalize",
+                            textTransform: "none",
                             fontSize: "16px",
                             color:
                               name === activeCategory ? "#4caf50" : "#9e9e9e",
