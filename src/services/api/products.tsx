@@ -74,7 +74,11 @@ const ProductsApi = {
 
   AddProduct(form: Product) {
     return API().postForm(`/products`, form);
-  }
+  },
+
+  EditProduct(id:string, form: Product) {
+    return API().putForm(`/products/` + id, form);
+  },
 };
 
 export default ProductsApi;
