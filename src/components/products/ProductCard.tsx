@@ -280,6 +280,22 @@ const defaultProductValues: Product = {
   star: 3,
 };
 
+async function urlToImageFile(url: string): Promise<File> {
+  // Fetch the contents of the URL
+  const response = await fetch(url);
+
+  // Read the response as an array of bytes
+  const arrayBuffer = await response.arrayBuffer();
+
+  // Create a new Blob object from the array
+  const blob = new Blob([arrayBuffer], { type: "image/jpeg" });
+
+  // Create a new File object from the Blob
+  const file = new File([blob], Date.now().toString() + ".jpg", { type: "image/jpeg" });
+
+  return file;
+}
+
 export const ProductCard: FC<{
   product: Product,
   category?: string,
@@ -348,7 +364,10 @@ export const ProductCard: FC<{
       setOpenDeleteProductModal(false);
     };
 
-    const handleEditProduct: SubmitHandler<Product> = (data) => {
+    const handleEditProduct: SubmitHandler<Product> = async (data) => {
+      if (typeof(data.image) === "string" && data.image !== "") {
+        data.image = await urlToImageFile(BaseUrl + "/" + data.image)
+      }
       ProductsApi.EditProduct(product.id.toString(), data)
         .then((res) => {
           enqueueSnackbar(`Update product '${data.name}' successfully.`, {
@@ -386,6 +405,7 @@ export const ProductCard: FC<{
 
     const handleClearProductImage = () => {
       setProductImage("");
+      setValue("image", "");
       if (imageRef !== null && imageRef.current !== null)
         imageRef.current.value = "";
     };
@@ -707,7 +727,7 @@ export const ProductCard: FC<{
                             </label>
                           </Stack>
                         </Tooltip>
-                        {productImage.length > 0 && (
+                        {productImage && productImage.length > 0 && (
                           <Button
                             size="small"
                             style={{
