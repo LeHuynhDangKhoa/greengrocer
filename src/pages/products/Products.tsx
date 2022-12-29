@@ -246,7 +246,7 @@ function Products() {
     const [openAddCategoryModal, setOpenAddCategoryModal] = useState(false);
     const [openAddProductModal, setOpenAddProductModal] = useState(false);
     const {
-        webStore: { user, categoryCount },
+        webStore: { user, categoryCount, reloadFlag },
         modifyWebStore,
     } = useWebStore();
     const validationCategorySchema = Yup.object({
@@ -276,7 +276,7 @@ function Products() {
         defaultValues: defaultProductValues,
         resolver: yupResolver(validationProductSchema),
     });
-    const [reloadFlag, setReloadFlag] = useState(false);
+    // const [reloadFlag, setReloadFlag] = useState(false);
     const [productImage, setProductImage] = useState("");
     const [changeCategories, setChangeCategories] = useState(0);
     const imageRef = useRef<HTMLInputElement>(null);
@@ -367,8 +367,8 @@ function Products() {
                 });
                 resetCategory(defaultCategoryValues);
                 handleCloseCategoryModal();
-                setReloadFlag(!reloadFlag);
-                modifyWebStore({ categoryCount: categoryCount + 1 })
+                // setReloadFlag(!reloadFlag);
+                modifyWebStore({ categoryCount: categoryCount + 1, reloadFlag: !reloadFlag })
             })
             .catch((err) => {
                 enqueueSnackbar(err.response.data.message, {
@@ -398,7 +398,8 @@ function Products() {
                 resetProduct(defaultProductValues);
                 handleCloseProductModal();
                 setProductImage("");
-                setReloadFlag(!reloadFlag);
+                // setReloadFlag(!reloadFlag);
+                modifyWebStore({ reloadFlag: !reloadFlag })
             })
             .catch((err) => {
                 enqueueSnackbar(err.response.data.message, {

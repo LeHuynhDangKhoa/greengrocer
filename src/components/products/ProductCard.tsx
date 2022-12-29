@@ -292,13 +292,12 @@ export const ProductCard: FC<{
     const [hoverCard, setHoverCard] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
     const {
-      webStore: { user, cartCount },
+      webStore: { user, cartCount, reloadFlag },
       modifyWebStore,
     } = useWebStore();
     const [openEditProductModal, setOpenEditProductModal] = useState(false);
-    const [reloadFlag, setReloadFlag] = useState(reload);
+    const [openDeleteProductModal, setOpenDeleteProductModal] = useState(false);
     const [productImage, setProductImage] = useState(product.image as string);
-    // const [defaultEditProductValues, setDefaultEditProductValues] = useState(defaultProductValues);
     const validationProductSchema = Yup.object({
       name: Yup.string().required("Name is required"),
       price: Yup.number().positive("Price is required and must be a positive number").required("Price is required and must be a positive number"),
@@ -333,12 +332,20 @@ export const ProductCard: FC<{
       addProductToCart(product, category);
     };
 
-    const handleOpenEditProductModal = (product: Product) => {
+    const handleOpenEditProductModal = () => {
       setOpenEditProductModal(true);
     };
 
     const handleCloseEditProductModal = () => {
       setOpenEditProductModal(false);
+    };
+
+    const handleOpenDeleteProductModal = () => {
+      setOpenDeleteProductModal(true);
+    };
+
+    const handleCloseDeleteProductModal = () => {
+      setOpenDeleteProductModal(false);
     };
 
     const handleEditProduct: SubmitHandler<Product> = (data) => {
@@ -352,7 +359,8 @@ export const ProductCard: FC<{
           // resetProduct(defaultProductValues);
           handleCloseEditProductModal();
           setProductImage("");
-          setReloadFlag(!reloadFlag);
+          // setReloadFlag(!reloadFlag);
+          modifyWebStore({ reloadFlag: !reloadFlag })
         })
         .catch((err) => {
           enqueueSnackbar(err.response.data.message, {
@@ -402,8 +410,9 @@ export const ProductCard: FC<{
             name: "All",
             total: 0,
           };
-          setChangeCategories(tmp[0].id)
-          setValue("category_id", tmp[0].id);
+          setChangeCategories(product.category_id)
+          setProductImage(product.image !== "" ? BaseUrl + "/" + productImage : "");
+          // setValue("category_id", tmp[0].id);
           if (tmp.length > 0) {
             for (let i = 0; i < tmp.length; i++) {
               all.total += tmp[i].total;
@@ -425,6 +434,25 @@ export const ProductCard: FC<{
         unmounted = true;
       };
     }, [reloadFlag]);
+
+    const handleDeleteProduct = () => {
+      ProductsApi.DeleteProduct(product.id.toString())
+      .then((res) => {
+          enqueueSnackbar(`Delete category '${product.name}' successfully.`, {
+              variant: "success",
+              autoHideDuration: 4000,
+              action: SnackBarAction,
+          });
+          modifyWebStore({ reloadFlag: !reloadFlag })
+      })
+      .catch((err) => {
+          enqueueSnackbar(err.response.data.message, {
+              variant: "error",
+              autoHideDuration: 4000,
+              action: SnackBarAction,
+          });
+      });
+    };
 
     return (
       <Card
@@ -547,319 +575,10 @@ export const ProductCard: FC<{
                       minWidth: "25px",
                       minHeight: "25px",
                     }}
-                    onClick={() => handleOpenEditProductModal(product)}
+                    onClick={handleOpenEditProductModal}
                   >
                     <BorderColorIcon sx={{ fontSize: "15px", color: "white" }} />
                   </IconButton>
-                  <Dialog
-                    open={openEditProductModal}
-                    onClose={handleCloseEditProductModal}
-                    maxWidth="sm"
-                    fullWidth
-                  >
-                    <form onSubmit={handleSubmitProduct(handleEditProduct)}>
-                      <Grid
-                        container
-                        sx={{ fontSize: 16, fontWeight: "bold" }}
-                        style={{ display: "flex", alignItems: "center" }}
-                      >
-                        <Grid item xs={12} sm={6}>
-                          <DialogTitle fontWeight="bold">Edit Product</DialogTitle>
-                        </Grid>
-                        <Grid
-                          item
-                          xs={12}
-                          sm={6}
-                          style={{ display: "flex", justifyContent: "right" }}
-                        >
-                          <DialogTitle>
-                            <IconButton onClick={handleCloseEditProductModal}>
-                              <Close style={{ fontSize: "18px" }} />
-                            </IconButton>
-                          </DialogTitle>
-                        </Grid>
-                      </Grid>
-                      <Divider />
-                      <DialogContent style={{ paddingTop: 0, paddingBottom: 0 }}>
-                        <Controller
-                          render={({ field }) => (
-                            <Box
-                              style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                flexDirection: "column",
-                                marginTop: "15px",
-                              }}
-                            >
-                              <Tooltip title="Upload" arrow placement="right">
-                                <Stack>
-                                  <StyleInput
-                                    accept="image/*"
-                                    id="upload-button-file"
-                                    multiple
-                                    type="file"
-                                    ref={imageRef}
-                                    onChange={(event) => {
-                                      if (
-                                        event.target.files &&
-                                        event.target.files.length > 0
-                                      )
-                                        field.onChange(event.target.files[0]);
-                                      handleChangeProductImage(event);
-                                    }}
-                                  />
-                                  <label htmlFor="upload-button-file">
-                                    <Button
-                                      aria-label="upload picture"
-                                      component="span"
-                                    >
-                                      <Avatar
-                                        alt=""
-                                        src={productImage !== "" ? BaseUrl + "/" + productImage : NoImageAvalable}
-                                        sx={{ width: 150, height: 150 }}
-                                        variant="square"
-                                      >
-                                        <PhotoCamera />
-                                      </Avatar>
-                                    </Button>
-                                  </label>
-                                </Stack>
-                              </Tooltip>
-                              {productImage.length > 0 && (
-                                <Button
-                                  size="small"
-                                  style={{
-                                    padding: 0,
-                                    fontSize: "12px",
-                                    textTransform: "capitalize",
-                                    color: "rgb(11, 176, 226)",
-                                  }}
-                                  onClick={handleClearProductImage}
-                                >
-                                  {" "}
-                                  Clear
-                                </Button>
-                              )}
-                            </Box>
-                          )}
-                          name="image"
-                          control={controlProduct}
-                        />
-                        <Controller
-                          render={({ field }) => (
-                            <Box style={{
-                              marginTop: "15px",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center"
-                            }}>
-                              <Rating
-                                // name="star-controlled"
-                                {...field}
-                                defaultValue={3}
-                                onChange={(e, newValue) => {
-                                  setValue("star", newValue as number);
-                                }}
-                              />
-                            </Box>
-                          )}
-                          name="star"
-                          control={controlProduct}
-                        />
-                        <Grid container>
-                          <Grid item xs={12} sm={6}>
-                            <Controller
-                              render={({ field }) => (
-                                <StyledHookFormControl
-                                  style={{ width: "100%", marginTop: "15px" }}
-                                >
-                                  <InputLabel
-                                    htmlFor="name"
-                                    style={{ display: "flex", fontWeight: "bold" }}
-                                  >
-                                    Name{" "}
-                                    <Typography color="error">&nbsp;*</Typography>
-                                  </InputLabel>
-                                  <OutlinedInput
-                                    id="name"
-                                    {...field}
-                                    label="Name"
-                                    error={!!errorsProduct.name}
-                                    style={{ width: "95%" }}
-                                  />
-                                  {errorsProduct.name && (
-                                    <Typography
-                                      color="error"
-                                      style={{ fontSize: "12px" }}
-                                    >
-                                      {errorsProduct.name.message}
-                                    </Typography>
-                                  )}
-                                </StyledHookFormControl>
-                              )}
-                              name="name"
-                              control={controlProduct}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6}
-                            style={{ display: "flex", justifyContent: "right" }}>
-                            <Controller
-                              render={({ field }) => (
-                                <StyledHookFormControl
-                                  style={{ width: "95%", marginTop: "15px" }}
-                                >
-                                  <InputLabel
-                                    htmlFor="price"
-                                    style={{ display: "flex", fontWeight: "bold" }}
-                                  >
-                                    Price{" "}
-                                    <Typography color="error">&nbsp;*</Typography>
-                                  </InputLabel>
-                                  <OutlinedInput
-                                    id="price"
-                                    {...field}
-                                    onChange={(val) => setValue("price", Number(val.target.value))}
-                                    label="Price"
-                                    error={!!errorsProduct.price}
-                                    type="number"
-                                    inputProps={{ step: 0.01 }}
-                                  />
-                                  {errorsProduct.price && (
-                                    <Typography
-                                      color="error"
-                                      style={{ fontSize: "12px" }}
-                                    >
-                                      {errorsProduct.price.message}
-                                    </Typography>
-                                  )}
-                                </StyledHookFormControl>
-                              )}
-                              name="price"
-                              control={controlProduct}
-                            />
-                          </Grid>
-                        </Grid>
-                        <Box style={{ marginTop: "15px" }}>
-                          <Typography
-                            style={{ fontWeight: "bold", color: "#9e9e9e", fontSize: "12px" }}>
-                            Description
-                          </Typography>
-                          <Controller
-                            render={({ field }) => (
-                              <StyledTextarea
-                                rows={4}
-                                aria-label="Description"
-                                {...field}
-                                style={{ width: "100%" }}
-                              />
-                            )}
-                            name="description"
-                            control={controlProduct}
-                          />
-                        </Box>
-                        <Grid container>
-                          <Grid item xs={12} sm={6}>
-                            <Controller
-                              render={({ field }) => (
-                                <StyledHookFormControl fullWidth style={{
-                                  marginTop: "15px",
-                                  width: "95%"
-                                }}>
-                                  <InputLabel id="categories"
-                                    style={{ fontWeight: "bold" }}>
-                                    Categories
-                                  </InputLabel>
-                                  <Select
-                                    labelId="categories"
-                                    value={changeCategories}
-                                    label="Categories"
-                                    onChange={(val) => {
-                                      setValue("category_id", Number(val.target.value));
-                                      setChangeCategories(Number(val.target.value));
-                                    }}
-                                    style={{ fontSize: "14px" }}
-                                  >
-                                    {categories.filter(item => item.name !== "All").map((category) => {
-                                      return (
-                                        <MenuItem
-                                          key={category.id + "-" + category.name}
-                                          value={category.id}>
-                                          {category.name}
-                                        </MenuItem>
-                                      );
-                                    })}
-                                  </Select>
-                                </StyledHookFormControl>
-                              )}
-                              name="category_id"
-                              control={controlProduct}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6} style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end"
-                          }}>
-                            <Controller
-                              render={({ field }) => (
-                                <StyledHookFormControl
-                                  style={{ width: "95%", marginTop: "15px" }}
-                                >
-                                  <InputLabel
-                                    htmlFor="discount"
-                                    style={{ display: "flex", fontWeight: "bold" }}
-                                  >
-                                    Discount (%)
-                                    {/* <Typography color="error">&nbsp;*</Typography> */}
-                                  </InputLabel>
-                                  <OutlinedInput
-                                    id="discount"
-                                    // {...field}
-                                    onChange={(val) => setValue("discount", Number(val.target.value) / 100)}
-                                    label="Discount (%)"
-                                    error={!!errorsProduct.discount}
-                                    type="number"
-                                    defaultValue={product.discount*100}
-                                    inputProps={{ step: 0.1 }}
-                                  />
-                                  {errorsProduct.discount && (
-                                    <Typography
-                                      color="error"
-                                      style={{ fontSize: "12px" }}
-                                    >
-                                      {errorsProduct.discount.message}
-                                    </Typography>
-                                  )}
-                                </StyledHookFormControl>
-                              )}
-                              name="discount"
-                              control={controlProduct}
-                            />
-                          </Grid>
-                        </Grid>
-                      </DialogContent>
-                      <DialogActions
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          style={{
-                            backgroundColor: "rgb(11, 176, 226)",
-                            width: "20%",
-                          }}
-                          type="submit"
-                        >
-                          Submit
-                        </Button>
-                      </DialogActions>
-                    </form>
-                  </Dialog>
                   <IconButton
                     aria-label="cart"
                     style={{
@@ -882,7 +601,7 @@ export const ProductCard: FC<{
                       minWidth: "25px",
                       minHeight: "25px",
                     }}
-                    onClick={(e) => handleAddProduct(e, product.name)}
+                    onClick={handleOpenDeleteProductModal}
                   >
                     <DeleteIcon sx={{ fontSize: "15px", color: "white" }} />
                   </IconButton>
@@ -912,6 +631,375 @@ export const ProductCard: FC<{
             ) : (
               <Rating name="read-only" value={product.star} readOnly size="small" />
             )}
+            <Dialog
+              open={openEditProductModal}
+              onClose={handleCloseEditProductModal}
+              maxWidth="sm"
+              fullWidth
+            >
+              <form onSubmit={handleSubmitProduct(handleEditProduct)}>
+                <Grid
+                  container
+                  sx={{ fontSize: 16, fontWeight: "bold" }}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <Grid item xs={12} sm={6}>
+                    <DialogTitle fontWeight="bold">Edit Product</DialogTitle>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    style={{ display: "flex", justifyContent: "right" }}
+                  >
+                    <DialogTitle>
+                      <IconButton onClick={handleCloseEditProductModal}>
+                        <Close style={{ fontSize: "18px" }} />
+                      </IconButton>
+                    </DialogTitle>
+                  </Grid>
+                </Grid>
+                <Divider />
+                <DialogContent style={{ paddingTop: 0, paddingBottom: 0 }}>
+                  <Controller
+                    render={({ field }) => (
+                      <Box
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          flexDirection: "column",
+                          marginTop: "15px",
+                        }}
+                      >
+                        <Tooltip title="Upload" arrow placement="right">
+                          <Stack>
+                            <StyleInput
+                              accept="image/*"
+                              id="upload-button-file"
+                              multiple
+                              type="file"
+                              ref={imageRef}
+                              onChange={(event) => {
+                                if (
+                                  event.target.files &&
+                                  event.target.files.length > 0
+                                )
+                                  field.onChange(event.target.files[0]);
+                                handleChangeProductImage(event);
+                              }}
+                            />
+                            <label htmlFor="upload-button-file">
+                              <Button
+                                aria-label="upload picture"
+                                component="span"
+                              >
+                                <Avatar
+                                  alt=""
+                                  // src={productImage !== "" ? BaseUrl + "/" + productImage : NoImageAvalable}
+                                  src={productImage}
+                                  sx={{ width: 150, height: 150 }}
+                                  variant="square"
+                                >
+                                  <PhotoCamera />
+                                </Avatar>
+                              </Button>
+                            </label>
+                          </Stack>
+                        </Tooltip>
+                        {productImage.length > 0 && (
+                          <Button
+                            size="small"
+                            style={{
+                              padding: 0,
+                              fontSize: "12px",
+                              textTransform: "capitalize",
+                              color: "rgb(11, 176, 226)",
+                            }}
+                            onClick={handleClearProductImage}
+                          >
+                            {" "}
+                            Clear
+                          </Button>
+                        )}
+                      </Box>
+                    )}
+                    name="image"
+                    control={controlProduct}
+                  />
+                  <Controller
+                    render={({ field }) => (
+                      <Box style={{
+                        marginTop: "15px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                      }}>
+                        <Rating
+                          // name="star-controlled"
+                          {...field}
+                          defaultValue={3}
+                          onChange={(e, newValue) => {
+                            setValue("star", newValue as number);
+                          }}
+                        />
+                      </Box>
+                    )}
+                    name="star"
+                    control={controlProduct}
+                  />
+                  <Grid container>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        render={({ field }) => (
+                          <StyledHookFormControl
+                            style={{ width: "100%", marginTop: "15px" }}
+                          >
+                            <InputLabel
+                              htmlFor="name"
+                              style={{ display: "flex", fontWeight: "bold" }}
+                            >
+                              Name{" "}
+                              <Typography color="error">&nbsp;*</Typography>
+                            </InputLabel>
+                            <OutlinedInput
+                              id="name"
+                              {...field}
+                              label="Name"
+                              error={!!errorsProduct.name}
+                              style={{ width: "95%" }}
+                            />
+                            {errorsProduct.name && (
+                              <Typography
+                                color="error"
+                                style={{ fontSize: "12px" }}
+                              >
+                                {errorsProduct.name.message}
+                              </Typography>
+                            )}
+                          </StyledHookFormControl>
+                        )}
+                        name="name"
+                        control={controlProduct}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}
+                      style={{ display: "flex", justifyContent: "right" }}>
+                      <Controller
+                        render={({ field }) => (
+                          <StyledHookFormControl
+                            style={{ width: "95%", marginTop: "15px" }}
+                          >
+                            <InputLabel
+                              htmlFor="price"
+                              style={{ display: "flex", fontWeight: "bold" }}
+                            >
+                              Price{" "}
+                              <Typography color="error">&nbsp;*</Typography>
+                            </InputLabel>
+                            <OutlinedInput
+                              id="price"
+                              {...field}
+                              onChange={(val) => setValue("price", Number(val.target.value))}
+                              label="Price"
+                              error={!!errorsProduct.price}
+                              type="number"
+                              inputProps={{ step: 0.01 }}
+                            />
+                            {errorsProduct.price && (
+                              <Typography
+                                color="error"
+                                style={{ fontSize: "12px" }}
+                              >
+                                {errorsProduct.price.message}
+                              </Typography>
+                            )}
+                          </StyledHookFormControl>
+                        )}
+                        name="price"
+                        control={controlProduct}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Box style={{ marginTop: "15px" }}>
+                    <Typography
+                      style={{ fontWeight: "bold", color: "#9e9e9e", fontSize: "12px" }}>
+                      Description
+                    </Typography>
+                    <Controller
+                      render={({ field }) => (
+                        <StyledTextarea
+                          rows={4}
+                          aria-label="Description"
+                          {...field}
+                          style={{ width: "100%" }}
+                        />
+                      )}
+                      name="description"
+                      control={controlProduct}
+                    />
+                  </Box>
+                  <Grid container>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        render={({ field }) => (
+                          <StyledHookFormControl fullWidth style={{
+                            marginTop: "15px",
+                            width: "95%"
+                          }}>
+                            <InputLabel id="categories"
+                              style={{ fontWeight: "bold" }}>
+                              Categories
+                            </InputLabel>
+                            <Select
+                              labelId="categories"
+                              value={changeCategories}
+                              label="Categories"
+                              onChange={(val) => {
+                                setValue("category_id", Number(val.target.value));
+                                setChangeCategories(Number(val.target.value));
+                              }}
+                              style={{ fontSize: "14px" }}
+                            >
+                              {categories.filter(item => item.name !== "All").map((category) => {
+                                return (
+                                  <MenuItem
+                                    key={category.id + "-" + category.name}
+                                    value={category.id}>
+                                    {category.name}
+                                  </MenuItem>
+                                );
+                              })}
+                            </Select>
+                          </StyledHookFormControl>
+                        )}
+                        name="category_id"
+                        control={controlProduct}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end"
+                    }}>
+                      <Controller
+                        render={({ field }) => (
+                          <StyledHookFormControl
+                            style={{ width: "95%", marginTop: "15px" }}
+                          >
+                            <InputLabel
+                              htmlFor="discount"
+                              style={{ display: "flex", fontWeight: "bold" }}
+                            >
+                              Discount (%)
+                              {/* <Typography color="error">&nbsp;*</Typography> */}
+                            </InputLabel>
+                            <OutlinedInput
+                              id="discount"
+                              // {...field}
+                              onChange={(val) => setValue("discount", Number(val.target.value) / 100)}
+                              label="Discount (%)"
+                              error={!!errorsProduct.discount}
+                              type="number"
+                              defaultValue={product.discount * 100}
+                              inputProps={{ step: 0.1 }}
+                            />
+                            {errorsProduct.discount && (
+                              <Typography
+                                color="error"
+                                style={{ fontSize: "12px" }}
+                              >
+                                {errorsProduct.discount.message}
+                              </Typography>
+                            )}
+                          </StyledHookFormControl>
+                        )}
+                        name="discount"
+                        control={controlProduct}
+                      />
+                    </Grid>
+                  </Grid>
+                </DialogContent>
+                <DialogActions
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    size="medium"
+                    style={{
+                      backgroundColor: "rgb(11, 176, 226)",
+                      width: "20%",
+                    }}
+                    type="submit"
+                  >
+                    Submit
+                  </Button>
+                </DialogActions>
+              </form>
+            </Dialog>
+            <Dialog
+              open={openDeleteProductModal}
+              onClose={handleCloseDeleteProductModal}
+              maxWidth="sm"
+              fullWidth
+            >
+              <Grid
+                container
+                sx={{ fontSize: 14 }}
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <Grid item xs={12} sm={10}>
+                  <DialogTitle>Are you sure to delete '{product.name}' product?</DialogTitle>
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  sm={2}
+                  style={{ display: "flex", justifyContent: "right" }}
+                >
+                  <DialogTitle>
+                    <IconButton onClick={handleCloseDeleteProductModal}>
+                      <Close style={{ fontSize: "18px" }} />
+                    </IconButton>
+                  </DialogTitle>
+                </Grid>
+              </Grid>
+              <Divider />
+              <DialogActions
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Button
+                  variant="contained"
+                  size="medium"
+                  style={{
+                    backgroundColor: "rgb(11, 176, 226)",
+                    width: "20%",
+                  }}
+                  onClick={handleCloseDeleteProductModal}
+                >
+                  No
+                </Button>
+                <Button
+                  variant="contained"
+                  size="medium"
+                  color="error"
+                  style={{
+                    width: "20%",
+                  }}
+                  onClick={handleDeleteProduct}
+                >
+                  Yes
+                </Button>
+              </DialogActions>
+            </Dialog>
             {/* {hoverCard ? (
             <IconButton
               aria-label="cart"
