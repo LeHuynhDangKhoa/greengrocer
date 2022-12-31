@@ -1489,7 +1489,7 @@ function Products() {
                                             fontSize="small"
                                             sx={{ '&:hover button': { display: 'unset' } }}
                                         >
-                                            {v.id > 0 && (<>
+                                            {user && user.role === "admin" && v.id > 0 && (<>
                                                 <IconButton
                                                     aria-label="cart"
                                                     sx={{ display: 'none' }}
