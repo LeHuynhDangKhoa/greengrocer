@@ -29,6 +29,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ChangeEvent, FC, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { NoProductFoundLogo } from "../../assets/icons/NoProductsFound";
 import { getCartContent } from "../../commons/Cart";
@@ -201,6 +202,7 @@ const Cart = () => {
   const [anchorElUpdate, setAnchorElUpdate] = useState<null | HTMLElement>(
     null
   );
+  const navigate = useNavigate();
 
   const handleOpenUpdate = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUpdate(event.currentTarget);
@@ -306,6 +308,10 @@ const Cart = () => {
 
   const handleCheckout: SubmitHandler<CustomerInfoForm> = (data) => {
     if (localStorage.getItem("user")) {
+      let cart = cartContent;
+      let total_price = cart ? coupon ? cart.total_price * (1 - coupon.discount) : cart.total_price : 0;
+      cart = cart ? { ...cart, total_price: parseFloat(total_price.toFixed(2)) } : undefined;
+      localStorage.setItem("cart", JSON.stringify(cart));
       const user: User = JSON.parse(localStorage.getItem("user") as string)
       const tmp: CartCheckoutInfo = {
         user_id: user.id,
@@ -315,20 +321,23 @@ const Cart = () => {
         detail: JSON.parse(localStorage.getItem("cart") as string),
       }
       CartApi.StoreCart(tmp)
-      .then((res) => {
-        enqueueSnackbar(`Store cart successfully.`, {
-          variant: "success",
-          autoHideDuration: 4000,
-          action: SnackBarAction,
+        .then((res) => {
+          enqueueSnackbar(`Store cart successfully.`, {
+            variant: "success",
+            autoHideDuration: 4000,
+            action: SnackBarAction,
+          });
+          localStorage.removeItem("cart");
+          modifyWebStore({ cartCount: cartCount + 1 });
+          navigate("/products")
+        })
+        .catch((err) => {
+          enqueueSnackbar(err.response.data.message, {
+            variant: "error",
+            autoHideDuration: 4000,
+            action: SnackBarAction,
+          });
         });
-      })
-      .catch((err) => {
-        enqueueSnackbar(err.response.data.message, {
-          variant: "error",
-          autoHideDuration: 4000,
-          action: SnackBarAction,
-        });
-      });
     } else {
       enqueueSnackbar("You must login to checkout.", {
         variant: "warning",
@@ -339,22 +348,35 @@ const Cart = () => {
   };
 
   const handleAppleCoupon = () => {
-    ProductsApi.CouponDetail(couponValue)
-      .then((res) => {
-        setCoupon(res.data);
-        enqueueSnackbar("Apply coupon successfully.", {
-          variant: "success",
-          autoHideDuration: 4000,
-          action: SnackBarAction,
+    if (couponValue.length > 0) {
+      ProductsApi.CouponDetail(couponValue)
+        .then((res) => {
+          setCoupon(res.data.data);
+          enqueueSnackbar("Apply coupon successfully.", {
+            variant: "success",
+            autoHideDuration: 4000,
+            action: SnackBarAction,
+          });
+          // let cart = cartContent;
+          // let total_price = cart ? cart.total_price*res.data.data.discount : 0;
+          // cart = cart ? {...cart, total_price: total_price} : undefined;
+          // // let total_price = cartContent && coupon && cartContent.total_price*coupon?.discount : undefined;
+          // localStorage.setItem("cart", JSON.stringify(cart));
+        })
+        .catch((err) => {
+          enqueueSnackbar(err.response.data.message, {
+            variant: "error",
+            autoHideDuration: 4000,
+            action: SnackBarAction,
+          });
         });
-      })
-      .catch((err) => {
-        enqueueSnackbar(err.response.data.message, {
-          variant: "error",
-          autoHideDuration: 4000,
-          action: SnackBarAction,
-        });
+    } else {
+      enqueueSnackbar("Please input coupon code.", {
+        variant: "warning",
+        autoHideDuration: 4000,
+        action: SnackBarAction,
       });
+    }
   };
 
   return (
@@ -700,7 +722,7 @@ const Cart = () => {
                         error={!!errors.name}
                       />
                     )}
-                    name="name"                   
+                    name="name"
                     control={control}
                   />
                   {errors.name && (
