@@ -83,6 +83,14 @@ const ProductsApi = {
   DeleteProduct(id:string) {
     return API().delete(`/products/` + id);
   },
+
+  EditCategory(id:string, form: Category) {
+    return API().putForm(`/categories/` + id, form);
+  },
+
+  DeleteCategory(id:string) {
+    return API().delete(`/categories/` + id);
+  },
 };
 
 export default ProductsApi;

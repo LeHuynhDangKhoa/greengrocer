@@ -91,6 +91,7 @@ export interface User extends LoginForm {
 }
 
 export interface Category {
+  id: number,
   name: string;
 }
 

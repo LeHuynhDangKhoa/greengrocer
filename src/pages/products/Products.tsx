@@ -31,10 +31,10 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { Link, useLocation, useParams, useSearchParams, } from "react-router-dom";
+import { Link, useLocation, useParams, useSearchParams, useNavigate } from "react-router-dom";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Category, Product, ProductCategory } from "../../commons/Types";
-import { useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import ProductsApi from "../../services/api/products";
 import { useRootLayout } from "../../hooks/useRootLayout";
 import { ProductCard } from "../../components/products/ProductCard";
@@ -43,6 +43,8 @@ import { useSnackbar } from "notistack";
 import { SnackBarAction } from "../../commons/Alert";
 import { useWebStore } from "../../providers/WebStoreProvider";
 import { Close, PhotoCamera } from "@mui/icons-material";
+import BorderColorIcon from '@mui/icons-material/BorderColor';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -183,6 +185,7 @@ const Input = styled("input")({
 });
 
 const defaultCategoryValues = {
+    id: 0,
     name: "",
 };
 const defaultProductValues = {
@@ -280,6 +283,11 @@ function Products() {
     const [productImage, setProductImage] = useState("");
     const [changeCategories, setChangeCategories] = useState(0);
     const imageRef = useRef<HTMLInputElement>(null);
+    const [openEditCategoryModal, setOpenEditCategoryModal] = useState(false);
+    const [openDeleteCategoryModal, setOpenDeleteCategoryModal] = useState(false);
+    const [deleteCategory, setDeleteCategory] = useState<Category>({ id: 0, name: "" });
+    const [editCategory, setEditCategory] = useState<Category>({ id: 0, name: "" });
+    const navigate = useNavigate();
 
     const handleChangePagination = (
         event: React.ChangeEvent<unknown>,
@@ -385,6 +393,7 @@ function Products() {
 
     const handleCloseProductModal = () => {
         setOpenAddProductModal(false);
+        resetCategory({ ...defaultCategoryValues, id: 0, name: "" })
     };
 
     const handleAddProduct: SubmitHandler<Product> = (data) => {
@@ -427,6 +436,232 @@ function Products() {
         setProductImage("");
         if (imageRef !== null && imageRef.current !== null)
             imageRef.current.value = "";
+    };
+
+    const handleDeleteCategory = (id: number, name: string) => {
+        handleCloseDeleteCategoryModal()
+        ProductsApi.DeleteCategory(id.toString())
+            .then((res) => {
+                enqueueSnackbar(`Delete category '${name}' successfully.`, {
+                    variant: "success",
+                    autoHideDuration: 4000,
+                    action: SnackBarAction,
+                });
+                modifyWebStore({ categoryCount: categoryCount + 1, reloadFlag: !reloadFlag })
+                navigate('/products');
+            })
+            .catch((err) => {
+                enqueueSnackbar(err.response.data.message, {
+                    variant: "error",
+                    autoHideDuration: 4000,
+                    action: SnackBarAction,
+                });
+            });
+    };
+
+    const DeleteCategoryModal: FC<{
+        id: number, name: string
+    }> = ({
+        id,
+        name
+    }) => {
+            return (
+                <Dialog
+                    open={openDeleteCategoryModal}
+                    onClose={handleCloseDeleteCategoryModal}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <Grid
+                        container
+                        sx={{ fontSize: 14 }}
+                        style={{ display: "flex", alignItems: "center" }}
+                    >
+                        <Grid item xs={12} sm={10}>
+                            <DialogTitle>Are you sure to delete '{name}' product?</DialogTitle>
+                        </Grid>
+                        <Grid
+                            item
+                            xs={12}
+                            sm={2}
+                            style={{ display: "flex", justifyContent: "right" }}
+                        >
+                            <DialogTitle>
+                                <IconButton onClick={handleCloseDeleteCategoryModal}>
+                                    <Close style={{ fontSize: "18px" }} />
+                                </IconButton>
+                            </DialogTitle>
+                        </Grid>
+                    </Grid>
+                    <Divider />
+                    <DialogActions
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Button
+                            variant="contained"
+                            size="medium"
+                            style={{
+                                backgroundColor: "rgb(11, 176, 226)",
+                                width: "20%",
+                            }}
+                            onClick={handleCloseDeleteCategoryModal}
+                        >
+                            No
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="medium"
+                            color="error"
+                            style={{
+                                width: "20%",
+                            }}
+                            onClick={() => handleDeleteCategory(id, name)}
+                        >
+                            Yes
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )
+        }
+
+    const handleOpenDeleteCategoryModal = (category: Category) => {
+        setOpenDeleteCategoryModal(true);
+        setDeleteCategory({ ...deleteCategory, id: category.id, name: category.name });
+    };
+
+    const handleCloseDeleteCategoryModal = () => {
+        setOpenDeleteCategoryModal(false);
+        setDeleteCategory({ ...deleteCategory, id: 0, name: "" })
+    };
+
+    const handleOpenEditCategoryModal = (category: Category) => {
+        setOpenEditCategoryModal(true);
+        setEditCategory({ ...editCategory, id: category.id, name: category.name })
+        resetCategory({ ...defaultCategoryValues, id: category.id, name: category.name })
+    };
+
+    const handleCloseEditCategoryModal = () => {
+        setOpenEditCategoryModal(false);
+        resetCategory({ ...defaultCategoryValues, id: 0, name: "" })
+        setEditCategory({ ...deleteCategory, id: 0, name: "" })
+    };
+
+    const EditCategoryModal: FC = () => {
+        return (
+            <Dialog
+                open={openEditCategoryModal}
+                onClose={handleCloseEditCategoryModal}
+                maxWidth="sm"
+                fullWidth
+            >
+                <form onSubmit={handleSubmitCategory(handleEditCategory)}>
+                    <Grid
+                        container
+                        sx={{ fontSize: 16, fontWeight: "bold" }}
+                        style={{ display: "flex", alignItems: "center" }}
+                    >
+                        <Grid item xs={12} sm={6}>
+                            <DialogTitle fontWeight="bold">
+                                Edit Category
+                            </DialogTitle>
+                        </Grid>
+                        <Grid
+                            item
+                            xs={12}
+                            sm={6}
+                            style={{ display: "flex", justifyContent: "right" }}
+                        >
+                            <DialogTitle>
+                                <IconButton onClick={handleCloseEditCategoryModal}>
+                                    <Close style={{ fontSize: "18px" }} />
+                                </IconButton>
+                            </DialogTitle>
+                        </Grid>
+                    </Grid>
+                    <Divider />
+                    <DialogContent
+                        style={{ paddingTop: 0, paddingBottom: 0 }}
+                    >
+                        <Controller
+                            render={({ field }) => (
+                                <StyledHookFormControl
+                                    style={{ width: "100%", marginTop: "15px" }}
+                                >
+                                    <InputLabel
+                                        htmlFor="name"
+                                        {...field}
+                                        style={{ display: "flex" }}
+                                    >
+                                        Name{" "}
+                                        <Typography color="error">&nbsp;*</Typography>
+                                    </InputLabel>
+                                    <OutlinedInput
+                                        id="name"
+                                        {...field}
+                                        label="Name"
+                                        error={!!errorsCategory.name}
+                                    />
+                                    {errorsCategory.name && (
+                                        <Typography
+                                            color="error"
+                                            style={{ fontSize: "12px" }}
+                                        >
+                                            {errorsCategory.name.message}
+                                        </Typography>
+                                    )}
+                                </StyledHookFormControl>
+                            )}
+                            name="name"
+                            control={controlCategory}
+                        />
+                    </DialogContent>
+                    <DialogActions
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Button
+                            variant="contained"
+                            size="medium"
+                            style={{
+                                backgroundColor: "rgb(11, 176, 226)",
+                                width: "20%",
+                            }}
+                            type="submit"
+                        >
+                            Submit
+                        </Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+        )
+    }
+
+    const handleEditCategory: SubmitHandler<Category> = (data) => {
+        handleCloseEditCategoryModal();
+        ProductsApi.EditCategory(data.id.toString(), data)
+            .then((res) => {
+                enqueueSnackbar(`Edit category '${data.name}' successfully.`, {
+                    variant: "success",
+                    autoHideDuration: 4000,
+                    action: SnackBarAction,
+                });
+                modifyWebStore({ categoryCount: categoryCount + 1, reloadFlag: !reloadFlag })
+                navigate("/products/"+data.name)
+            })
+            .catch((err) => {
+                enqueueSnackbar(err.response.data.message, {
+                    variant: "error",
+                    autoHideDuration: 4000,
+                    action: SnackBarAction,
+                });
+            });
     };
 
     useEffect(() => {
@@ -1042,7 +1277,7 @@ function Products() {
                     <Grid
                         item
                         xs={12}
-                        sm={2.5}
+                        sm={2.8}
                         style={{
                             display: "flex",
                             flexDirection: "column",
@@ -1068,7 +1303,7 @@ function Products() {
                                     Categories
                                 </Typography>
                             </Grid>
-                            {/* {user && user.role === "admin" && (
+                            {user && user.role === "admin" && (
                                 <Grid
                                     xs={12}
                                     sm={6}
@@ -1099,8 +1334,8 @@ function Products() {
                                         <form onSubmit={handleSubmitCategory(handleAddCategory)}>
                                             <Grid
                                                 container
-                                                sx={{fontSize: 16, fontWeight: "bold"}}
-                                                style={{display: "flex", alignItems: "center"}}
+                                                sx={{ fontSize: 16, fontWeight: "bold" }}
+                                                style={{ display: "flex", alignItems: "center" }}
                                             >
                                                 <Grid item xs={12} sm={6}>
                                                     <DialogTitle fontWeight="bold">
@@ -1111,27 +1346,27 @@ function Products() {
                                                     item
                                                     xs={12}
                                                     sm={6}
-                                                    style={{display: "flex", justifyContent: "right"}}
+                                                    style={{ display: "flex", justifyContent: "right" }}
                                                 >
                                                     <DialogTitle>
                                                         <IconButton onClick={handleCloseCategoryModal}>
-                                                            <Close style={{fontSize: "18px"}}/>
+                                                            <Close style={{ fontSize: "18px" }} />
                                                         </IconButton>
                                                     </DialogTitle>
                                                 </Grid>
                                             </Grid>
-                                            <Divider/>
+                                            <Divider />
                                             <DialogContent
-                                                style={{paddingTop: 0, paddingBottom: 0}}
+                                                style={{ paddingTop: 0, paddingBottom: 0 }}
                                             >
                                                 <Controller
-                                                    render={({field}) => (
+                                                    render={({ field }) => (
                                                         <StyledHookFormControl
-                                                            style={{width: "100%", marginTop: "15px"}}
+                                                            style={{ width: "100%", marginTop: "15px" }}
                                                         >
                                                             <InputLabel
                                                                 htmlFor="name"
-                                                                style={{display: "flex"}}
+                                                                style={{ display: "flex" }}
                                                             >
                                                                 Name{" "}
                                                                 <Typography color="error">&nbsp;*</Typography>
@@ -1145,7 +1380,7 @@ function Products() {
                                                             {errorsCategory.name && (
                                                                 <Typography
                                                                     color="error"
-                                                                    style={{fontSize: "12px"}}
+                                                                    style={{ fontSize: "12px" }}
                                                                 >
                                                                     {errorsCategory.name.message}
                                                                 </Typography>
@@ -1178,22 +1413,28 @@ function Products() {
                                         </form>
                                     </Dialog>
                                 </Grid>
-                            )} */}
+                            )}
                         </Grid>
                         <Divider></Divider>
                         <List>
-                            {categories.map(({ id, name, total }, i) => {
+                            {openDeleteCategoryModal && deleteCategory && deleteCategory.id > 0 && (
+                                <DeleteCategoryModal id={deleteCategory.id} name={deleteCategory.name} />
+                            )}
+                            {openEditCategoryModal && editCategory && editCategory.id > 0 && (
+                                <EditCategoryModal />
+                            )}
+                            {categories.map((v, i) => {
                                 const path =
-                                    name === "All"
+                                    v.name === "All"
                                         ? "/products"
-                                        : "/products/" + name.split(" ").join("_");
+                                        : "/products/" + v.name.split(" ").join("_");
                                 const activeCategory = category
                                     ? category.split("_").join(" ")
                                     : "All";
                                 return (
                                     <Grid
                                         container
-                                        key={i + "-" + name.toLowerCase()}
+                                        key={i + "-" + v.name.toLowerCase()}
                                         style={{ padding: 0, margin: 0 }}
 
                                     >
@@ -1206,19 +1447,7 @@ function Products() {
                                                 justifyContent: "flex-start",
                                                 padding: 0,
                                             }}
-                                        // sx={{'&:hover button': {display:'unset'}}}
                                         >
-                                            {/*<Button*/}
-                                            {/*    size="small"*/}
-                                            {/*    sx={{display:'none'}}*/}
-                                            {/*>*/}
-                                            {/*    delete*/}
-                                            {/*</Button><Button*/}
-                                            {/*    size="small"*/}
-                                            {/*    sx={{display:'none'}}*/}
-                                            {/*>*/}
-                                            {/*    delete*/}
-                                            {/*</Button>*/}
                                             <Link
                                                 to={{
                                                     pathname: path,
@@ -1241,11 +1470,11 @@ function Products() {
                                                         textTransform: "none",
                                                         fontSize: "16px",
                                                         color:
-                                                            name === activeCategory ? "#4caf50" : "#9e9e9e",
-                                                        fontWeight: name === activeCategory ? "bold" : "",
+                                                            v.name === activeCategory ? "#4caf50" : "#9e9e9e",
+                                                        fontWeight: v.name === activeCategory ? "bold" : "",
                                                     }}
                                                 >
-                                                    {name}
+                                                    {v.name}
                                                 </Button>
                                             </Link>
                                         </Grid>
@@ -1256,15 +1485,37 @@ function Products() {
                                             style={{
                                                 display: "flex",
                                                 justifyContent: "flex-end",
-                                                padding: 0,
                                             }}
+                                            fontSize="small"
+                                            sx={{ '&:hover button': { display: 'unset' } }}
                                         >
+                                            {v.id > 0 && (<>
+                                                <IconButton
+                                                    aria-label="cart"
+                                                    sx={{ display: 'none' }}
+                                                    onClick={() => handleOpenEditCategoryModal(v)}
+                                                >
+                                                    <BorderColorIcon sx={{
+                                                        fontSize: 18, display: "flex", justifyContent: "flex-start",
+                                                        alignItems: "flex-start",
+                                                    }} />
+                                                </IconButton>
+                                                <IconButton
+                                                    aria-label="cart"
+                                                    sx={{ display: 'none' }}
+                                                    onClick={() => handleOpenDeleteCategoryModal(v)}
+                                                >
+                                                    <DeleteIcon sx={{
+                                                        fontSize: 18, display: "flex", justifyContent: "flex-start",
+                                                        alignItems: "flex-start",
+                                                    }} />
+                                                </IconButton></>)}
                                             <ListItemText
                                                 primary={
                                                     <Typography
                                                         style={{
                                                             color:
-                                                                name === activeCategory
+                                                                v.name === activeCategory
                                                                     ? "white"
                                                                     : "rgb(158, 158, 158)",
                                                             fontWeight: "bold",
@@ -1272,14 +1523,14 @@ function Products() {
                                                             justifyContent: "flex-end",
                                                         }}
                                                     >
-                                                        {total}
+                                                        {v.total}
                                                     </Typography>
                                                 }
                                                 style={{
                                                     display: "flex",
                                                     maxWidth: "40px",
                                                     backgroundColor:
-                                                        name === activeCategory ? "#4caf50" : "#f5f5f5",
+                                                        v.name === activeCategory ? "#4caf50" : "#f5f5f5",
                                                     marginLeft: "30px",
                                                     float: "right",
                                                     justifyContent: "center",
@@ -1365,7 +1616,7 @@ function Products() {
                     <Grid
                         item
                         xs={12}
-                        sm={9.5}
+                        sm={9.2}
                         style={{
                             display: "flex",
                             flexDirection: "column",
