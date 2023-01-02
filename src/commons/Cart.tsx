@@ -27,7 +27,7 @@ export const addProductToCart = (
       // cart.data[index].quantity = cart.data[index].quantity + quantity;
     }
     cart.data.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
-    cart.total_price = cart.total_price + price;
+    cart.total_price = cart.total_price + price * quantity;
     cart.total_quantity = cart.total_quantity + quantity;
     localStorage.setItem("cart", JSON.stringify(cart));
   } else {
